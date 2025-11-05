@@ -335,52 +335,109 @@ header h1 {
     margin-bottom: 20px;
 }
 
-.mapping-list {
+.mapping-table-container {
+    overflow-x: auto;
     border: 1px solid #e0e0e0;
     border-radius: 5px;
-    padding: 15px;
-    max-height: 600px;
-    overflow-y: auto;
 }
 
-.mapping-item {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
-    gap: 15px;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
-    border: 1px solid #e0e0e0;
-}
-
-.mapping-source,
-.mapping-target {
+.mapping-table {
+    width: 100%;
+    border-collapse: collapse;
     background: white;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+    font-size: 14px;
 }
 
-.mapping-arrow {
-    font-size: 24px;
+.mapping-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.mapping-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.mapping-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s;
+}
+
+.mapping-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.mapping-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.mapping-table td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.field-col {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 120px;
+}
+
+.api-col {
+    font-family: 'Courier New', monospace;
+    color: #666;
+    font-size: 12px;
+    min-width: 120px;
+}
+
+.label-col {
+    color: #555;
+    min-width: 120px;
+}
+
+.type-col {
+    min-width: 80px;
+}
+
+.type-badge {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.value-col {
+    font-family: 'Courier New', monospace;
+    color: #555;
+    font-size: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.arrow-col {
+    text-align: center;
+    font-size: 20px;
     color: #667eea;
     font-weight: bold;
+    width: 40px;
 }
 
-.mapping-remove {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.mapping-remove:hover {
-    background: #c82333;
+.sf-select-col {
+    min-width: 250px;
 }
 
 .mapping-select {
@@ -388,7 +445,39 @@ header h1 {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    margin-top: 8px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+}
+
+.mapping-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.actions-col {
+    text-align: center;
+    width: 60px;
+}
+
+.mapping-remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.mapping-remove-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
 }
 
 .empty-state {

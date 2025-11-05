@@ -285,7 +285,7 @@ sourceTypeSelect.addEventListener('change', (e) => {
 
 // Mapping Section
 const mappingSection = document.getElementById('mapping-section');
-const mappingList = document.getElementById('mapping-list');
+const mappingTableBody = document.getElementById('mapping-table-body');
 const saveMappingBtn = document.getElementById('save-mapping-btn');
 const loadMappingBtn = document.getElementById('load-mapping-btn');
 const clearMappingBtn = document.getElementById('clear-mapping-btn');
@@ -338,24 +338,35 @@ function renderMappings() {
         const emptyMessage = sourceType === 'csv'
             ? 'Load a CSV file and connect to Destination Salesforce to create mappings'
             : 'Connect to both Source and Destination Salesforce orgs and select objects to create mappings';
-        mappingList.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+        mappingTableBody.innerHTML = `<tr><td colspan="8" class="empty-state">${emptyMessage}</td></tr>`;
         return;
     }
 
-    mappingList.innerHTML = fieldMappings.map((mapping, index) => {
-        const selectedDestField = destFields.find(f => f.name === mapping.destField);
+    // Get the full source field data for sample values
+    const sourceFieldsData = sourceType === 'csv' ? csvFields : sourceFields;
+
+    mappingTableBody.innerHTML = fieldMappings.map((mapping, index) => {
+        // Find the full source field data to get sample values
+        const sourceFieldData = sourceFieldsData.find(f => f.name === mapping.sourceField);
+        const sampleValues = sourceFieldData?.sampleValues || [];
+        const sampleText = sampleValues.length > 0
+            ? sampleValues.slice(0, 3).map(v => {
+                const str = String(v);
+                return str.length > 30 ? str.substring(0, 30) + '...' : str;
+              }).join(', ')
+            : 'No data';
 
         return `
-        <div class="mapping-item">
-            <div class="mapping-source">
-                <div class="field-name">${mapping.sourceLabel}</div>
-                <div class="field-api-name">API: ${mapping.sourceField}</div>
-                <span class="field-type">${mapping.sourceType}</span>
-            </div>
-            <div class="mapping-arrow">→</div>
-            <div class="mapping-target">
+        <tr>
+            <td class="field-col">${mapping.sourceField}</td>
+            <td class="api-col">${mapping.sourceField}</td>
+            <td class="label-col">${mapping.sourceLabel}</td>
+            <td class="type-col"><span class="type-badge">${mapping.sourceType}</span></td>
+            <td class="value-col" title="${sampleValues.join(', ')}">${sampleText}</td>
+            <td class="arrow-col">→</td>
+            <td class="sf-select-col">
                 <select class="mapping-select" data-index="${index}">
-                    <option value="">-- Select Destination Field --</option>
+                    <option value="">-- Select Salesforce Field --</option>
                     ${destFields.map(destField => `
                         <option value="${destField.name}"
                                 data-type="${destField.type}"
@@ -365,14 +376,11 @@ function renderMappings() {
                         </option>
                     `).join('')}
                 </select>
-                ${mapping.destField ? `
-                    <div class="field-name">${mapping.destLabel}</div>
-                    <div class="field-api-name">API: ${mapping.destField}</div>
-                    <span class="field-type">${mapping.destType}</span>
-                ` : ''}
-            </div>
-            <button class="mapping-remove" data-index="${index}">Remove</button>
-        </div>
+            </td>
+            <td class="actions-col">
+                <button class="mapping-remove-btn" data-index="${index}" title="Remove mapping">×</button>
+            </td>
+        </tr>
         `;
     }).join('');
 
@@ -381,7 +389,7 @@ function renderMappings() {
         select.addEventListener('change', handleMappingChange);
     });
 
-    document.querySelectorAll('.mapping-remove').forEach(btn => {
+    document.querySelectorAll('.mapping-remove-btn').forEach(btn => {
         btn.addEventListener('click', handleMappingRemove);
     });
 }
