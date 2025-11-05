@@ -67,6 +67,42 @@ header h1 {
     margin-top: 20px;
 }
 
+.source-type-selector {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 2px solid #667eea;
+}
+
+.source-type-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #667eea;
+    font-size: 14px;
+}
+
+.source-type-dropdown {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.source-type-dropdown:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.source-section {
+    margin-top: 20px;
+}
+
 .form-group {
     margin-bottom: 15px;
 }

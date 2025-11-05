@@ -10,55 +10,84 @@
     <div class="container">
         <header>
             <h1>RK Migration - Data Sync & Comparison</h1>
-            <p class="subtitle">Compare Salesforce objects between source and destination orgs</p>
+            <p class="subtitle">Compare and map data from CSV or Salesforce to your destination Salesforce org</p>
         </header>
 
         <div class="main-content">
-            <!-- Source Salesforce Connection Panel -->
+            <!-- Source Data Panel -->
             <div class="panel salesforce-panel source-panel">
-                <h2>Source Salesforce</h2>
-                <div id="source-login-form" class="form-section">
-                    <div class="form-group">
-                        <label for="source-url">Instance URL:</label>
-                        <select id="source-url">
-                            <option value="https://login.salesforce.com">Production (login.salesforce.com)</option>
-                            <option value="https://test.salesforce.com">Sandbox (test.salesforce.com)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="source-username">Username:</label>
-                        <input type="text" id="source-username" placeholder="your.email@company.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="source-password">Password:</label>
-                        <input type="password" id="source-password" placeholder="Password">
-                    </div>
-                    <div class="form-group">
-                        <label for="source-token">Security Token:</label>
-                        <input type="password" id="source-token" placeholder="Security Token">
-                    </div>
-                    <button id="source-connect-btn" class="btn btn-primary">Connect to Source</button>
-                    <div id="source-status" class="status-message"></div>
+                <h2>Source Data</h2>
+
+                <!-- Source Type Selector -->
+                <div class="source-type-selector">
+                    <label for="source-type">Select Source Type:</label>
+                    <select id="source-type" class="source-type-dropdown">
+                        <option value="csv">CSV File</option>
+                        <option value="salesforce">Salesforce API</option>
+                    </select>
                 </div>
 
-                <div id="source-connected-section" class="hidden">
-                    <div class="connected-info">
-                        <span class="status-indicator connected"></span>
-                        <span id="source-user-info">Connected</span>
-                        <button id="source-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
+                <!-- CSV Source Section -->
+                <div id="source-csv-section" class="source-section">
+                    <div class="form-section">
+                        <button id="load-csv-btn" class="btn btn-primary">Load CSV File</button>
+                        <span id="csv-file-name" class="file-name"></span>
+
+                        <div id="csv-data-section" class="hidden">
+                            <div class="csv-info">
+                                <span id="csv-row-count"></span>
+                            </div>
+                            <h3>CSV Fields</h3>
+                            <div id="csv-fields-list" class="fields-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salesforce Source Section -->
+                <div id="source-salesforce-section" class="source-section hidden">
+                    <div id="source-login-form" class="form-section">
+                        <div class="form-group">
+                            <label for="source-url">Instance URL:</label>
+                            <select id="source-url">
+                                <option value="https://login.salesforce.com">Production (login.salesforce.com)</option>
+                                <option value="https://test.salesforce.com">Sandbox (test.salesforce.com)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="source-username">Username:</label>
+                            <input type="text" id="source-username" placeholder="your.email@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="source-password">Password:</label>
+                            <input type="password" id="source-password" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label for="source-token">Security Token:</label>
+                            <input type="password" id="source-token" placeholder="Security Token">
+                        </div>
+                        <button id="source-connect-btn" class="btn btn-primary">Connect to Source</button>
+                        <div id="source-status" class="status-message"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="source-object-select">Select Source Object:</label>
-                        <input type="text" id="source-object-search" placeholder="Search objects...">
-                        <select id="source-object-select" size="10">
-                            <option value="">Loading objects...</option>
-                        </select>
-                    </div>
+                    <div id="source-connected-section" class="hidden">
+                        <div class="connected-info">
+                            <span class="status-indicator connected"></span>
+                            <span id="source-user-info">Connected</span>
+                            <button id="source-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
+                        </div>
 
-                    <div id="source-fields-section" class="hidden">
-                        <h3>Source Fields</h3>
-                        <div id="source-fields-list" class="fields-list"></div>
+                        <div class="form-group">
+                            <label for="source-object-select">Select Source Object:</label>
+                            <input type="text" id="source-object-search" placeholder="Search objects...">
+                            <select id="source-object-select" size="10">
+                                <option value="">Loading objects...</option>
+                            </select>
+                        </div>
+
+                        <div id="source-fields-section" class="hidden">
+                            <h3>Source Fields</h3>
+                            <div id="source-fields-list" class="fields-list"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -108,23 +137,6 @@
                     <div id="dest-fields-section" class="hidden">
                         <h3>Destination Fields</h3>
                         <div id="dest-fields-list" class="fields-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CSV Data Panel (Optional) -->
-            <div class="panel csv-panel hidden">
-                <h2>CSV Data (Optional)</h2>
-                <div class="form-section">
-                    <button id="load-csv-btn" class="btn btn-primary">Load CSV File</button>
-                    <span id="csv-file-name" class="file-name"></span>
-
-                    <div id="csv-data-section" class="hidden">
-                        <div class="csv-info">
-                            <span id="csv-row-count"></span>
-                        </div>
-                        <h3>CSV Fields</h3>
-                        <div id="csv-fields-list" class="fields-list"></div>
                     </div>
                 </div>
             </div>

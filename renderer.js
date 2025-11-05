@@ -3,6 +3,7 @@ const jsforce = require('jsforce');
 const Papa = require('papaparse');
 
 // Global state
+let sourceType = 'csv'; // 'csv' or 'salesforce'
 let sourceConnection = null;
 let destConnection = null;
 let sourceObjects = [];
@@ -209,6 +210,33 @@ class SFConnectionManager {
 const sourceManager = new SFConnectionManager('source');
 const destManager = new SFConnectionManager('dest');
 
+// Source Type Switching
+const sourceTypeSelect = document.getElementById('source-type');
+const sourceCsvSection = document.getElementById('source-csv-section');
+const sourceSalesforceSection = document.getElementById('source-salesforce-section');
+
+sourceTypeSelect.addEventListener('change', (e) => {
+    sourceType = e.target.value;
+
+    if (sourceType === 'csv') {
+        sourceCsvSection.classList.remove('hidden');
+        sourceSalesforceSection.classList.add('hidden');
+        // Clear Salesforce source data
+        sourceFields = [];
+        sourceConnection = null;
+    } else {
+        sourceCsvSection.classList.add('hidden');
+        sourceSalesforceSection.classList.remove('hidden');
+        // Clear CSV data
+        csvFields = [];
+        csvData = null;
+    }
+
+    // Reset mappings when switching source type
+    fieldMappings = [];
+    updateMappingSection();
+});
+
 // Mapping Section
 const mappingSection = document.getElementById('mapping-section');
 const mappingList = document.getElementById('mapping-list');
@@ -217,20 +245,40 @@ const loadMappingBtn = document.getElementById('load-mapping-btn');
 const clearMappingBtn = document.getElementById('clear-mapping-btn');
 
 function updateMappingSection() {
+    // Determine which source fields to use
+    let activeSourceFields = [];
+
+    if (sourceType === 'csv' && csvFields.length > 0) {
+        activeSourceFields = csvFields;
+    } else if (sourceType === 'salesforce' && sourceFields.length > 0) {
+        activeSourceFields = sourceFields;
+    }
+
     // Show mapping section only when both source and destination have fields
-    if (sourceFields.length > 0 && destFields.length > 0) {
+    if (activeSourceFields.length > 0 && destFields.length > 0) {
         mappingSection.classList.remove('hidden');
 
         // Initialize mappings if not already done
         if (fieldMappings.length === 0) {
-            fieldMappings = sourceFields.map(sourceField => ({
-                sourceField: sourceField.name,
-                sourceLabel: sourceField.label,
-                sourceType: sourceField.type,
-                destField: '',
-                destLabel: '',
-                destType: ''
-            }));
+            if (sourceType === 'csv') {
+                fieldMappings = csvFields.map(csvField => ({
+                    sourceField: csvField.name,
+                    sourceLabel: csvField.name,
+                    sourceType: csvField.type,
+                    destField: '',
+                    destLabel: '',
+                    destType: ''
+                }));
+            } else {
+                fieldMappings = sourceFields.map(sourceField => ({
+                    sourceField: sourceField.name,
+                    sourceLabel: sourceField.label,
+                    sourceType: sourceField.type,
+                    destField: '',
+                    destLabel: '',
+                    destType: ''
+                }));
+            }
         }
 
         renderMappings();
@@ -241,7 +289,10 @@ function updateMappingSection() {
 
 function renderMappings() {
     if (fieldMappings.length === 0) {
-        mappingList.innerHTML = '<div class="empty-state">Connect to both Source and Destination Salesforce orgs and select objects to create mappings</div>';
+        const emptyMessage = sourceType === 'csv'
+            ? 'Load a CSV file and connect to Destination Salesforce to create mappings'
+            : 'Connect to both Source and Destination Salesforce orgs and select objects to create mappings';
+        mappingList.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
         return;
     }
 
@@ -308,13 +359,14 @@ function handleMappingRemove(e) {
 
 // Save/Load Mapping
 saveMappingBtn.addEventListener('click', async () => {
-    const sourceObject = sourceManager.elements.objectSelect.value;
     const destObject = destManager.elements.objectSelect.value;
 
     const mappingData = {
-        sourceOrg: sourceManager.elements.username.value,
+        sourceType: sourceType,
+        sourceOrg: sourceType === 'salesforce' ? sourceManager.elements.username.value : null,
+        sourceCsvFile: sourceType === 'csv' ? csvFileName.textContent : null,
+        sourceObject: sourceType === 'salesforce' ? sourceManager.elements.objectSelect.value : null,
         destOrg: destManager.elements.username.value,
-        sourceObject: sourceObject,
         destObject: destObject,
         mappings: fieldMappings,
         savedAt: new Date().toISOString()
@@ -337,14 +389,25 @@ loadMappingBtn.addEventListener('click', async () => {
 
 clearMappingBtn.addEventListener('click', () => {
     if (confirm('Are you sure you want to clear all mappings?')) {
-        fieldMappings = sourceFields.map(sourceField => ({
-            sourceField: sourceField.name,
-            sourceLabel: sourceField.label,
-            sourceType: sourceField.type,
-            destField: '',
-            destLabel: '',
-            destType: ''
-        }));
+        if (sourceType === 'csv') {
+            fieldMappings = csvFields.map(csvField => ({
+                sourceField: csvField.name,
+                sourceLabel: csvField.name,
+                sourceType: csvField.type,
+                destField: '',
+                destLabel: '',
+                destType: ''
+            }));
+        } else {
+            fieldMappings = sourceFields.map(sourceField => ({
+                sourceField: sourceField.name,
+                sourceLabel: sourceField.label,
+                sourceType: sourceField.type,
+                destField: '',
+                destLabel: '',
+                destType: ''
+            }));
+        }
         renderMappings();
     }
 });
@@ -377,6 +440,9 @@ function parseCSV(content) {
             csvRowCount.textContent = `${csvData.length} rows found`;
             displayCsvFields(csvFields);
             csvDataSection.classList.remove('hidden');
+
+            // Update mapping section with CSV data
+            updateMappingSection();
         },
         error: (error) => {
             alert(`CSV parsing failed: ${error.message}`);

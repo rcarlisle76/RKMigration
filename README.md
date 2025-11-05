@@ -1,17 +1,24 @@
 # RK Migration - Sync Comparison Tool
 
-A desktop application for comparing and mapping Salesforce objects between source and destination orgs. This tool provides a visual interface to connect to two Salesforce environments, browse objects and fields, and create field mappings for data migration.
+A desktop application for comparing and mapping data from CSV files or Salesforce to a destination Salesforce org. This tool provides a flexible visual interface to work with multiple data sources and create field mappings for data migration.
 
 ## Features
 
-- **Dual Salesforce Connections**
-  - Connect to both Source and Destination Salesforce orgs simultaneously
-  - Support for Production and Sandbox environments
-  - Independent authentication for each org
-  - View connection status and user information
+- **Flexible Source Selection**
+  - Choose between CSV file or Salesforce API as your data source
+  - Easy switching between source types with dropdown selector
+  - Maintains separate configurations for each source type
 
-- **Object and Field Browsing**
-  - Browse all standard and custom objects in both orgs
+- **CSV Source Support**
+  - Load CSV files with an intuitive file picker
+  - Automatic field type detection (String, Integer, Double, Boolean, Date)
+  - Display sample values for each field
+  - Show data quality metrics (unique count, null count, row count)
+  - Works with any CSV file structure
+
+- **Salesforce Source Support**
+  - Connect to Source Salesforce org (Production or Sandbox)
+  - Browse all standard and custom objects
   - Search and filter available objects
   - View detailed field information including:
     - Field labels and API names
@@ -20,19 +27,19 @@ A desktop application for comparing and mapping Salesforce objects between sourc
     - Field lengths
     - Picklist values
 
+- **Destination Salesforce Connection**
+  - Always connects to Salesforce as destination
+  - Support for Production and Sandbox environments
+  - Independent authentication from source
+  - View connection status and user information
+
 - **Field Mapping Interface**
-  - Side-by-side comparison of Source and Destination Salesforce fields
+  - Side-by-side comparison of Source and Destination fields
   - Dropdown selection for mapping source fields to destination fields
-  - Display both field labels and API names
+  - Display both field labels and API names (for Salesforce sources)
   - Visual display of field types for validation
   - Add or remove individual mappings
   - Save and load mapping configurations as JSON
-
-- **CSV Data Support (Optional)**
-  - Load CSV files with an intuitive file picker
-  - Automatic field type detection (String, Integer, Double, Boolean, Date)
-  - Display sample values for each field
-  - Show data quality metrics (unique count, null count)
 
 ## Installation
 
@@ -55,16 +62,31 @@ npm run dev
 
 ## How to Use
 
-### Step 1: Connect to Source Salesforce
-1. In the **Source Salesforce** panel:
-   - Select your instance type (Production or Sandbox)
-   - Enter your Salesforce credentials:
-     - Username
-     - Password
-     - Security Token
-   - Click "Connect to Source"
+### Step 1: Select Source Type
+1. In the **Source Data** panel:
+   - Use the dropdown to select source type:
+     - **CSV File** - Load data from a CSV file
+     - **Salesforce API** - Connect to a Salesforce org
 
-### Step 2: Connect to Destination Salesforce
+### Step 2: Configure Your Source
+
+**Option A: CSV Source**
+1. Click "Load CSV File"
+2. Select your CSV file from the file picker
+3. Review the analyzed fields, types, and sample data
+
+**Option B: Salesforce Source**
+1. Select your instance type (Production or Sandbox)
+2. Enter your Salesforce credentials:
+   - Username
+   - Password
+   - Security Token
+3. Click "Connect to Source"
+4. Use the search box to find your source object
+5. Select the object from the dropdown
+6. Review the available source fields
+
+### Step 3: Connect to Destination Salesforce
 1. In the **Destination Salesforce** panel:
    - Select your instance type (Production or Sandbox)
    - Enter your Salesforce credentials:
@@ -72,22 +94,15 @@ npm run dev
      - Password
      - Security Token
    - Click "Connect to Destination"
-
-### Step 3: Select Objects
-1. In the **Source** panel:
-   - Use the search box to find your source object
-   - Select the object from the dropdown
-   - Review the available source fields
-2. In the **Destination** panel:
-   - Use the search box to find your destination object
-   - Select the object from the dropdown
-   - Review the available destination fields
+2. Use the search box to find your destination object
+3. Select the object from the dropdown
+4. Review the available destination fields
 
 ### Step 4: Create Field Mappings
-1. The mapping section will appear automatically when both objects are selected
+1. The mapping section will appear automatically when both source and destination are loaded
 2. For each source field, select the corresponding destination field from the dropdown
 3. The interface displays:
-   - Field labels and API names
+   - Field labels and API names (for Salesforce sources)
    - Field types for validation
    - Source → Destination arrow indicator
 4. Remove any mappings that aren't needed using the "Remove" button
@@ -128,17 +143,40 @@ RKMigration/
 
 Saved mappings are stored as JSON files with the following structure:
 
+**For Salesforce-to-Salesforce mappings:**
 ```json
 {
+  "sourceType": "salesforce",
   "sourceOrg": "user@source-org.com",
-  "destOrg": "user@dest-org.com",
   "sourceObject": "Account",
+  "destOrg": "user@dest-org.com",
   "destObject": "Account",
   "mappings": [
     {
       "sourceField": "Name",
       "sourceLabel": "Account Name",
       "sourceType": "string",
+      "destField": "Name",
+      "destLabel": "Account Name",
+      "destType": "string"
+    }
+  ],
+  "savedAt": "2025-11-05T12:00:00.000Z"
+}
+```
+
+**For CSV-to-Salesforce mappings:**
+```json
+{
+  "sourceType": "csv",
+  "sourceCsvFile": "accounts.csv",
+  "destOrg": "user@dest-org.com",
+  "destObject": "Account",
+  "mappings": [
+    {
+      "sourceField": "company_name",
+      "sourceLabel": "company_name",
+      "sourceType": "Text",
       "destField": "Name",
       "destLabel": "Account Name",
       "destType": "string"
