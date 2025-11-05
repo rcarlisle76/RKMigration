@@ -287,9 +287,6 @@ sourceTypeSelect.addEventListener('change', (e) => {
 const mappingSection = document.getElementById('mapping-section');
 const mappingTableBody = document.getElementById('mapping-table-body');
 const sourceFieldSelect = document.getElementById('source-field-select');
-const sourceLabelInput = document.getElementById('source-label');
-const sourceTypeInput = document.getElementById('source-type');
-const sourceValueInput = document.getElementById('source-value');
 const destFieldSelect = document.getElementById('dest-field-select');
 const addMappingBtn = document.getElementById('add-mapping-btn');
 const saveMappingBtn = document.getElementById('save-mapping-btn');
@@ -297,28 +294,17 @@ const loadMappingBtn = document.getElementById('load-mapping-btn');
 const clearMappingBtn = document.getElementById('clear-mapping-btn');
 
 function updateMappingSection() {
-    console.log('=== updateMappingSection called ===');
-    console.log('Source type:', sourceType);
-    console.log('CSV fields:', csvFields.length);
-    console.log('Salesforce fields:', sourceFields.length);
-    console.log('Dest fields:', destFields.length);
-
     // Determine which source fields to use
     let activeSourceFields = [];
 
     if (sourceType === 'csv' && csvFields.length > 0) {
         activeSourceFields = csvFields;
-        console.log('Using CSV fields as source');
     } else if (sourceType === 'salesforce' && sourceFields.length > 0) {
         activeSourceFields = sourceFields;
-        console.log('Using Salesforce fields as source');
     }
-
-    console.log('Active source fields:', activeSourceFields.length);
 
     // Show mapping section only when both source and destination have fields
     if (activeSourceFields.length > 0 && destFields.length > 0) {
-        console.log('Showing mapping section');
         mappingSection.classList.remove('hidden');
 
         // Populate source field dropdown
@@ -330,22 +316,18 @@ function updateMappingSection() {
         // Render existing mappings
         renderMappings();
     } else {
-        console.log('Hiding mapping section - missing source or dest fields');
         mappingSection.classList.add('hidden');
     }
 }
 
 function populateSourceFieldDropdown(fields) {
-    console.log('Populating source field dropdown with', fields.length, 'fields');
     sourceFieldSelect.innerHTML = '<option value="">-- Select Source Field --</option>';
 
     if (!fields || fields.length === 0) {
-        console.warn('No fields to populate');
         return;
     }
 
     fields.forEach(field => {
-        console.log('Adding field:', field.name);
         const option = document.createElement('option');
         option.value = field.name;
         option.textContent = field.name;
@@ -354,8 +336,6 @@ function populateSourceFieldDropdown(fields) {
         option.dataset.sampleValues = JSON.stringify(field.sampleValues || []);
         sourceFieldSelect.appendChild(option);
     });
-
-    console.log('Dropdown now has', sourceFieldSelect.options.length, 'options');
 }
 
 function populateDestFieldDropdown() {
@@ -370,35 +350,6 @@ function populateDestFieldDropdown() {
         destFieldSelect.appendChild(option);
     });
 }
-
-// Source field selection handler
-sourceFieldSelect.addEventListener('change', (e) => {
-    const selectedOption = e.target.options[e.target.selectedIndex];
-
-    if (selectedOption.value) {
-        const label = selectedOption.dataset.label;
-        const type = selectedOption.dataset.type;
-        const sampleValues = JSON.parse(selectedOption.dataset.sampleValues || '[]');
-
-        sourceLabelInput.value = label;
-        sourceTypeInput.value = type;
-
-        const sampleText = sampleValues.length > 0
-            ? sampleValues.slice(0, 3).map(v => {
-                const str = String(v);
-                return str.length > 50 ? str.substring(0, 50) + '...' : str;
-              }).join(', ')
-            : 'No data';
-
-        sourceValueInput.value = sampleText;
-        sourceValueInput.title = sampleValues.join(', ');
-    } else {
-        sourceLabelInput.value = '';
-        sourceTypeInput.value = '';
-        sourceValueInput.value = '';
-        sourceValueInput.title = '';
-    }
-});
 
 // Add mapping button handler
 addMappingBtn.addEventListener('click', () => {
@@ -437,17 +388,13 @@ addMappingBtn.addEventListener('click', () => {
     // Clear the form
     sourceFieldSelect.value = '';
     destFieldSelect.value = '';
-    sourceLabelInput.value = '';
-    sourceTypeInput.value = '';
-    sourceValueInput.value = '';
-    sourceValueInput.title = '';
 
     renderMappings();
 });
 
 function renderMappings() {
     if (fieldMappings.length === 0) {
-        mappingTableBody.innerHTML = `<tr><td colspan="7" class="empty-state">No mappings created yet. Use the form above to add mappings.</td></tr>`;
+        mappingTableBody.innerHTML = `<tr><td colspan="4" class="empty-state">No mappings created yet. Use the form above to add mappings.</td></tr>`;
         return;
     }
 
@@ -455,11 +402,8 @@ function renderMappings() {
         return `
         <tr>
             <td class="field-col">${mapping.sourceField}</td>
-            <td class="label-col">${mapping.sourceLabel}</td>
-            <td class="type-col"><span class="type-badge">${mapping.sourceType}</span></td>
             <td class="arrow-col">→</td>
-            <td class="field-col">${mapping.destLabel}</td>
-            <td class="type-col"><span class="type-badge">${mapping.destType}</span></td>
+            <td class="field-col">${mapping.destField}</td>
             <td class="actions-col">
                 <button class="mapping-remove-btn" data-index="${index}" title="Remove mapping">×</button>
             </td>
@@ -560,9 +504,6 @@ function analyzeCsvFields(results) {
     const fields = [];
     const headers = results.meta.fields;
 
-    console.log('CSV Headers:', headers);
-    console.log('Total rows:', results.data.length);
-
     headers.forEach(header => {
         const values = results.data.map(row => row[header]).filter(v => v != null && v !== '');
         const detectedType = detectFieldType(values);
@@ -575,11 +516,8 @@ function analyzeCsvFields(results) {
             nullCount: results.data.length - values.length,
             uniqueCount: new Set(values).size
         });
-
-        console.log(`Field: ${header}, Type: ${detectedType}, Samples: ${sampleValues.length}`);
     });
 
-    console.log('Total CSV fields analyzed:', fields.length);
     return fields;
 }
 
