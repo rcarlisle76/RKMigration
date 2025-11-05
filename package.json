@@ -1,0 +1,26 @@
+{
+  "name": "rkmigration-sync-comparison",
+  "version": "1.0.0",
+  "description": "Desktop application for comparing and mapping CSV data to Salesforce",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "keywords": [
+    "salesforce",
+    "migration",
+    "csv",
+    "data-mapping"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^28.0.0",
+    "jsforce": "^2.0.0-beta.29",
+    "papaparse": "^5.4.1"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

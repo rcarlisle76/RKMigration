@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RK Migration - Sync Comparison Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RK Migration - Data Sync & Comparison</h1>
+            <p class="subtitle">Compare CSV data with Salesforce objects and create field mappings</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Salesforce Connection Panel -->
+            <div class="panel salesforce-panel">
+                <h2>Salesforce Connection</h2>
+                <div id="sf-login-form" class="form-section">
+                    <div class="form-group">
+                        <label for="sf-url">Instance URL:</label>
+                        <select id="sf-url">
+                            <option value="https://login.salesforce.com">Production (login.salesforce.com)</option>
+                            <option value="https://test.salesforce.com">Sandbox (test.salesforce.com)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sf-username">Username:</label>
+                        <input type="text" id="sf-username" placeholder="your.email@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="sf-password">Password:</label>
+                        <input type="password" id="sf-password" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="sf-token">Security Token:</label>
+                        <input type="password" id="sf-token" placeholder="Security Token">
+                    </div>
+                    <button id="sf-connect-btn" class="btn btn-primary">Connect to Salesforce</button>
+                    <div id="sf-status" class="status-message"></div>
+                </div>
+
+                <div id="sf-connected-section" class="hidden">
+                    <div class="connected-info">
+                        <span class="status-indicator connected"></span>
+                        <span id="sf-user-info">Connected</span>
+                        <button id="sf-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sf-object-select">Select Salesforce Object:</label>
+                        <input type="text" id="sf-object-search" placeholder="Search objects...">
+                        <select id="sf-object-select" size="10">
+                            <option value="">Loading objects...</option>
+                        </select>
+                    </div>
+
+                    <div id="sf-fields-section" class="hidden">
+                        <h3>Salesforce Fields</h3>
+                        <div id="sf-fields-list" class="fields-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSV Data Panel -->
+            <div class="panel csv-panel">
+                <h2>CSV Data</h2>
+                <div class="form-section">
+                    <button id="load-csv-btn" class="btn btn-primary">Load CSV File</button>
+                    <span id="csv-file-name" class="file-name"></span>
+
+                    <div id="csv-data-section" class="hidden">
+                        <div class="csv-info">
+                            <span id="csv-row-count"></span>
+                        </div>
+                        <h3>CSV Fields</h3>
+                        <div id="csv-fields-list" class="fields-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapping Section -->
+        <div id="mapping-section" class="panel mapping-panel hidden">
+            <h2>Field Mapping</h2>
+            <div class="mapping-controls">
+                <button id="save-mapping-btn" class="btn btn-primary">Save Mapping</button>
+                <button id="load-mapping-btn" class="btn btn-secondary">Load Mapping</button>
+                <button id="clear-mapping-btn" class="btn btn-secondary">Clear Mapping</button>
+            </div>
+            <div id="mapping-list" class="mapping-list"></div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
