@@ -297,17 +297,28 @@ const loadMappingBtn = document.getElementById('load-mapping-btn');
 const clearMappingBtn = document.getElementById('clear-mapping-btn');
 
 function updateMappingSection() {
+    console.log('=== updateMappingSection called ===');
+    console.log('Source type:', sourceType);
+    console.log('CSV fields:', csvFields.length);
+    console.log('Salesforce fields:', sourceFields.length);
+    console.log('Dest fields:', destFields.length);
+
     // Determine which source fields to use
     let activeSourceFields = [];
 
     if (sourceType === 'csv' && csvFields.length > 0) {
         activeSourceFields = csvFields;
+        console.log('Using CSV fields as source');
     } else if (sourceType === 'salesforce' && sourceFields.length > 0) {
         activeSourceFields = sourceFields;
+        console.log('Using Salesforce fields as source');
     }
+
+    console.log('Active source fields:', activeSourceFields.length);
 
     // Show mapping section only when both source and destination have fields
     if (activeSourceFields.length > 0 && destFields.length > 0) {
+        console.log('Showing mapping section');
         mappingSection.classList.remove('hidden');
 
         // Populate source field dropdown
@@ -319,22 +330,32 @@ function updateMappingSection() {
         // Render existing mappings
         renderMappings();
     } else {
+        console.log('Hiding mapping section - missing source or dest fields');
         mappingSection.classList.add('hidden');
     }
 }
 
 function populateSourceFieldDropdown(fields) {
+    console.log('Populating source field dropdown with', fields.length, 'fields');
     sourceFieldSelect.innerHTML = '<option value="">-- Select Source Field --</option>';
 
+    if (!fields || fields.length === 0) {
+        console.warn('No fields to populate');
+        return;
+    }
+
     fields.forEach(field => {
+        console.log('Adding field:', field.name);
         const option = document.createElement('option');
         option.value = field.name;
         option.textContent = field.name;
-        option.dataset.label = sourceType === 'csv' ? field.name : field.label;
-        option.dataset.type = field.type;
+        option.dataset.label = sourceType === 'csv' ? field.name : (field.label || field.name);
+        option.dataset.type = field.type || 'unknown';
         option.dataset.sampleValues = JSON.stringify(field.sampleValues || []);
         sourceFieldSelect.appendChild(option);
     });
+
+    console.log('Dropdown now has', sourceFieldSelect.options.length, 'options');
 }
 
 function populateDestFieldDropdown() {
@@ -539,6 +560,9 @@ function analyzeCsvFields(results) {
     const fields = [];
     const headers = results.meta.fields;
 
+    console.log('CSV Headers:', headers);
+    console.log('Total rows:', results.data.length);
+
     headers.forEach(header => {
         const values = results.data.map(row => row[header]).filter(v => v != null && v !== '');
         const detectedType = detectFieldType(values);
@@ -551,8 +575,11 @@ function analyzeCsvFields(results) {
             nullCount: results.data.length - values.length,
             uniqueCount: new Set(values).size
         });
+
+        console.log(`Field: ${header}, Type: ${detectedType}, Samples: ${sampleValues.length}`);
     });
 
+    console.log('Total CSV fields analyzed:', fields.length);
     return fields;
 }
 
