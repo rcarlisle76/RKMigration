@@ -159,8 +159,39 @@ class SFConnectionManager {
         if (!objectName) return;
 
         try {
+            // Show loading message
+            this.elements.fieldsList.innerHTML = '<div class="loading-message">Loading fields and sample data...</div>';
+            this.elements.fieldsSection.classList.remove('hidden');
+
             const describe = await this.connection.sobject(objectName).describe();
             this.fields = describe.fields.sort((a, b) => a.label.localeCompare(b.label));
+
+            // Query sample records to show field values
+            const fieldNames = this.fields
+                .filter(f => f.type !== 'base64' && f.type !== 'address' && f.type !== 'location')
+                .map(f => f.name)
+                .slice(0, 50); // Limit to first 50 fields to avoid query limits
+
+            let sampleRecords = [];
+            try {
+                const query = `SELECT ${fieldNames.join(', ')} FROM ${objectName} LIMIT 5`;
+                const result = await this.connection.query(query);
+                sampleRecords = result.records || [];
+            } catch (queryError) {
+                console.warn('Could not fetch sample records:', queryError.message);
+            }
+
+            // Enhance fields with sample values
+            this.fields = this.fields.map(field => {
+                const sampleValues = sampleRecords
+                    .map(record => record[field.name])
+                    .filter(val => val != null && val !== '');
+
+                return {
+                    ...field,
+                    sampleValues: sampleValues.slice(0, 5)
+                };
+            });
 
             // Update global state
             if (this.prefix === 'source') {
@@ -170,7 +201,6 @@ class SFConnectionManager {
             }
 
             this.displayFields(this.fields);
-            this.elements.fieldsSection.classList.remove('hidden');
 
             updateMappingSection();
         } catch (error) {
@@ -179,7 +209,10 @@ class SFConnectionManager {
     }
 
     displayFields(fields) {
-        this.elements.fieldsList.innerHTML = fields.map(field => `
+        this.elements.fieldsList.innerHTML = fields.map(field => {
+            const hasSampleValues = field.sampleValues && field.sampleValues.length > 0;
+
+            return `
             <div class="field-item" data-field-name="${field.name}">
                 <div class="field-name">${field.label}</div>
                 <span class="field-type">${field.type}</span>
@@ -190,8 +223,21 @@ class SFConnectionManager {
                     ${field.length ? ` • Max Length: ${field.length}` : ''}
                     ${field.picklistValues && field.picklistValues.length > 0 ? ` • Picklist (${field.picklistValues.length} values)` : ''}
                 </div>
+                ${hasSampleValues ? `
+                    <div class="field-sample">
+                        <strong>Sample values:</strong><br>
+                        ${field.sampleValues.map(val => {
+                            const displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
+                            const truncated = String(displayVal).length > 100
+                                ? String(displayVal).substring(0, 100) + '...'
+                                : displayVal;
+                            return `• ${truncated}`;
+                        }).join('<br>')}
+                    </div>
+                ` : '<div class="field-sample"><em>No sample data available</em></div>'}
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     showStatus(message, type) {
@@ -502,17 +548,29 @@ function detectFieldType(values) {
 }
 
 function displayCsvFields(fields) {
-    csvFieldsList.innerHTML = fields.map(field => `
+    csvFieldsList.innerHTML = fields.map(field => {
+        const hasSampleValues = field.sampleValues && field.sampleValues.length > 0;
+
+        return `
         <div class="field-item" data-field-name="${field.name}">
             <div class="field-name">${field.name}</div>
             <span class="field-type">${field.type}</span>
             <div class="field-details">
                 Unique Values: ${field.uniqueCount} • Null Count: ${field.nullCount}
             </div>
-            <div class="field-sample">
-                <strong>Sample values:</strong><br>
-                ${field.sampleValues.map(v => `• ${v}`).join('<br>')}
-            </div>
+            ${hasSampleValues ? `
+                <div class="field-sample">
+                    <strong>Sample values:</strong><br>
+                    ${field.sampleValues.map(val => {
+                        const displayVal = String(val);
+                        const truncated = displayVal.length > 100
+                            ? displayVal.substring(0, 100) + '...'
+                            : displayVal;
+                        return `• ${truncated}`;
+                    }).join('<br>')}
+                </div>
+            ` : '<div class="field-sample"><em>No sample data available</em></div>'}
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
