@@ -286,6 +286,12 @@ sourceTypeSelect.addEventListener('change', (e) => {
 // Mapping Section
 const mappingSection = document.getElementById('mapping-section');
 const mappingTableBody = document.getElementById('mapping-table-body');
+const sourceFieldSelect = document.getElementById('source-field-select');
+const sourceLabelInput = document.getElementById('source-label');
+const sourceTypeInput = document.getElementById('source-type');
+const sourceValueInput = document.getElementById('source-value');
+const destFieldSelect = document.getElementById('dest-field-select');
+const addMappingBtn = document.getElementById('add-mapping-btn');
 const saveMappingBtn = document.getElementById('save-mapping-btn');
 const loadMappingBtn = document.getElementById('load-mapping-btn');
 const clearMappingBtn = document.getElementById('clear-mapping-btn');
@@ -304,79 +310,135 @@ function updateMappingSection() {
     if (activeSourceFields.length > 0 && destFields.length > 0) {
         mappingSection.classList.remove('hidden');
 
-        // Initialize mappings if not already done
-        if (fieldMappings.length === 0) {
-            if (sourceType === 'csv') {
-                fieldMappings = csvFields.map(csvField => ({
-                    sourceField: csvField.name,
-                    sourceLabel: csvField.name,
-                    sourceType: csvField.type,
-                    destField: '',
-                    destLabel: '',
-                    destType: ''
-                }));
-            } else {
-                fieldMappings = sourceFields.map(sourceField => ({
-                    sourceField: sourceField.name,
-                    sourceLabel: sourceField.label,
-                    sourceType: sourceField.type,
-                    destField: '',
-                    destLabel: '',
-                    destType: ''
-                }));
-            }
-        }
+        // Populate source field dropdown
+        populateSourceFieldDropdown(activeSourceFields);
 
+        // Populate destination field dropdown
+        populateDestFieldDropdown();
+
+        // Render existing mappings
         renderMappings();
     } else {
         mappingSection.classList.add('hidden');
     }
 }
 
-function renderMappings() {
-    if (fieldMappings.length === 0) {
-        const emptyMessage = sourceType === 'csv'
-            ? 'Load a CSV file and connect to Destination Salesforce to create mappings'
-            : 'Connect to both Source and Destination Salesforce orgs and select objects to create mappings';
-        mappingTableBody.innerHTML = `<tr><td colspan="8" class="empty-state">${emptyMessage}</td></tr>`;
-        return;
-    }
+function populateSourceFieldDropdown(fields) {
+    sourceFieldSelect.innerHTML = '<option value="">-- Select Source Field --</option>';
 
-    // Get the full source field data for sample values
-    const sourceFieldsData = sourceType === 'csv' ? csvFields : sourceFields;
+    fields.forEach(field => {
+        const option = document.createElement('option');
+        option.value = field.name;
+        option.textContent = field.name;
+        option.dataset.label = sourceType === 'csv' ? field.name : field.label;
+        option.dataset.type = field.type;
+        option.dataset.sampleValues = JSON.stringify(field.sampleValues || []);
+        sourceFieldSelect.appendChild(option);
+    });
+}
 
-    mappingTableBody.innerHTML = fieldMappings.map((mapping, index) => {
-        // Find the full source field data to get sample values
-        const sourceFieldData = sourceFieldsData.find(f => f.name === mapping.sourceField);
-        const sampleValues = sourceFieldData?.sampleValues || [];
+function populateDestFieldDropdown() {
+    destFieldSelect.innerHTML = '<option value="">-- Select Salesforce Field --</option>';
+
+    destFields.forEach(field => {
+        const option = document.createElement('option');
+        option.value = field.name;
+        option.textContent = `${field.label} (${field.name}) - ${field.type}`;
+        option.dataset.label = field.label;
+        option.dataset.type = field.type;
+        destFieldSelect.appendChild(option);
+    });
+}
+
+// Source field selection handler
+sourceFieldSelect.addEventListener('change', (e) => {
+    const selectedOption = e.target.options[e.target.selectedIndex];
+
+    if (selectedOption.value) {
+        const label = selectedOption.dataset.label;
+        const type = selectedOption.dataset.type;
+        const sampleValues = JSON.parse(selectedOption.dataset.sampleValues || '[]');
+
+        sourceLabelInput.value = label;
+        sourceTypeInput.value = type;
+
         const sampleText = sampleValues.length > 0
             ? sampleValues.slice(0, 3).map(v => {
                 const str = String(v);
-                return str.length > 30 ? str.substring(0, 30) + '...' : str;
+                return str.length > 50 ? str.substring(0, 50) + '...' : str;
               }).join(', ')
             : 'No data';
 
+        sourceValueInput.value = sampleText;
+        sourceValueInput.title = sampleValues.join(', ');
+    } else {
+        sourceLabelInput.value = '';
+        sourceTypeInput.value = '';
+        sourceValueInput.value = '';
+        sourceValueInput.title = '';
+    }
+});
+
+// Add mapping button handler
+addMappingBtn.addEventListener('click', () => {
+    const sourceFieldValue = sourceFieldSelect.value;
+    const destFieldValue = destFieldSelect.value;
+
+    if (!sourceFieldValue) {
+        alert('Please select a source field');
+        return;
+    }
+
+    if (!destFieldValue) {
+        alert('Please select a Salesforce field');
+        return;
+    }
+
+    // Check if mapping already exists
+    const exists = fieldMappings.some(m => m.sourceField === sourceFieldValue);
+    if (exists) {
+        alert('A mapping for this source field already exists');
+        return;
+    }
+
+    const selectedSourceOption = sourceFieldSelect.options[sourceFieldSelect.selectedIndex];
+    const selectedDestOption = destFieldSelect.options[destFieldSelect.selectedIndex];
+
+    fieldMappings.push({
+        sourceField: sourceFieldValue,
+        sourceLabel: selectedSourceOption.dataset.label,
+        sourceType: selectedSourceOption.dataset.type,
+        destField: destFieldValue,
+        destLabel: selectedDestOption.dataset.label,
+        destType: selectedDestOption.dataset.type
+    });
+
+    // Clear the form
+    sourceFieldSelect.value = '';
+    destFieldSelect.value = '';
+    sourceLabelInput.value = '';
+    sourceTypeInput.value = '';
+    sourceValueInput.value = '';
+    sourceValueInput.title = '';
+
+    renderMappings();
+});
+
+function renderMappings() {
+    if (fieldMappings.length === 0) {
+        mappingTableBody.innerHTML = `<tr><td colspan="7" class="empty-state">No mappings created yet. Use the form above to add mappings.</td></tr>`;
+        return;
+    }
+
+    mappingTableBody.innerHTML = fieldMappings.map((mapping, index) => {
         return `
         <tr>
             <td class="field-col">${mapping.sourceField}</td>
-            <td class="api-col">${mapping.sourceField}</td>
             <td class="label-col">${mapping.sourceLabel}</td>
             <td class="type-col"><span class="type-badge">${mapping.sourceType}</span></td>
-            <td class="value-col" title="${sampleValues.join(', ')}">${sampleText}</td>
             <td class="arrow-col">→</td>
-            <td class="sf-select-col">
-                <select class="mapping-select" data-index="${index}">
-                    <option value="">-- Select Salesforce Field --</option>
-                    ${destFields.map(destField => `
-                        <option value="${destField.name}"
-                                data-type="${destField.type}"
-                                data-label="${destField.label}"
-                                ${mapping.destField === destField.name ? 'selected' : ''}>
-                            ${destField.label} (${destField.name}) - ${destField.type}
-                        </option>
-                    `).join('')}
-                </select>
-            </td>
+            <td class="field-col">${mapping.destLabel}</td>
+            <td class="type-col"><span class="type-badge">${mapping.destType}</span></td>
             <td class="actions-col">
                 <button class="mapping-remove-btn" data-index="${index}" title="Remove mapping">×</button>
             </td>
@@ -385,30 +447,17 @@ function renderMappings() {
     }).join('');
 
     // Add event listeners
-    document.querySelectorAll('.mapping-select').forEach(select => {
-        select.addEventListener('change', handleMappingChange);
-    });
-
     document.querySelectorAll('.mapping-remove-btn').forEach(btn => {
         btn.addEventListener('click', handleMappingRemove);
     });
 }
 
-function handleMappingChange(e) {
-    const index = parseInt(e.target.dataset.index);
-    const selectedOption = e.target.options[e.target.selectedIndex];
-
-    fieldMappings[index].destField = e.target.value;
-    fieldMappings[index].destType = selectedOption.dataset.type || '';
-    fieldMappings[index].destLabel = selectedOption.dataset.label || '';
-
-    renderMappings();
-}
-
 function handleMappingRemove(e) {
     const index = parseInt(e.target.dataset.index);
-    fieldMappings.splice(index, 1);
-    renderMappings();
+    if (confirm('Are you sure you want to remove this mapping?')) {
+        fieldMappings.splice(index, 1);
+        renderMappings();
+    }
 }
 
 // Save/Load Mapping
@@ -443,25 +492,7 @@ loadMappingBtn.addEventListener('click', async () => {
 
 clearMappingBtn.addEventListener('click', () => {
     if (confirm('Are you sure you want to clear all mappings?')) {
-        if (sourceType === 'csv') {
-            fieldMappings = csvFields.map(csvField => ({
-                sourceField: csvField.name,
-                sourceLabel: csvField.name,
-                sourceType: csvField.type,
-                destField: '',
-                destLabel: '',
-                destType: ''
-            }));
-        } else {
-            fieldMappings = sourceFields.map(sourceField => ({
-                sourceField: sourceField.name,
-                sourceLabel: sourceField.label,
-                sourceType: sourceField.type,
-                destField: '',
-                destLabel: '',
-                destType: ''
-            }));
-        }
+        fieldMappings = [];
         renderMappings();
     }
 });

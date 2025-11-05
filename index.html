@@ -145,29 +145,79 @@
         <!-- Mapping Section -->
         <div id="mapping-section" class="panel mapping-panel hidden">
             <h2>Field Mapping</h2>
+
+            <!-- Mapping Creation Form -->
+            <div class="mapping-form">
+                <table class="mapping-form-table">
+                    <thead>
+                        <tr>
+                            <th>Field API Name</th>
+                            <th>Label</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th class="arrow-header"></th>
+                            <th>Salesforce Field</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select id="source-field-select" class="form-select">
+                                    <option value="">-- Select Source Field --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="source-label" class="form-input" readonly placeholder="Label">
+                            </td>
+                            <td>
+                                <input type="text" id="source-type" class="form-input" readonly placeholder="Type">
+                            </td>
+                            <td>
+                                <input type="text" id="source-value" class="form-input" readonly placeholder="Sample value" title="">
+                            </td>
+                            <td class="arrow-cell">→</td>
+                            <td>
+                                <select id="dest-field-select" class="form-select">
+                                    <option value="">-- Select Salesforce Field --</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button id="add-mapping-btn" class="btn btn-primary btn-small">Add</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mapping Controls -->
             <div class="mapping-controls">
                 <button id="save-mapping-btn" class="btn btn-primary">Save Mapping</button>
                 <button id="load-mapping-btn" class="btn btn-secondary">Load Mapping</button>
-                <button id="clear-mapping-btn" class="btn btn-secondary">Clear Mapping</button>
+                <button id="clear-mapping-btn" class="btn btn-secondary">Clear All Mappings</button>
             </div>
-            <div id="mapping-table-container" class="mapping-table-container">
-                <table id="mapping-table" class="mapping-table">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>API Name</th>
-                            <th>Label</th>
-                            <th>Type</th>
-                            <th>Sample Values</th>
-                            <th class="arrow-col"></th>
-                            <th>Salesforce Field</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mapping-table-body">
-                        <!-- Mappings will be inserted here -->
-                    </tbody>
-                </table>
+
+            <!-- Created Mappings List -->
+            <div id="mappings-list-section">
+                <h3>Created Mappings</h3>
+                <div id="mapping-table-container" class="mapping-table-container">
+                    <table id="mapping-table" class="mapping-table">
+                        <thead>
+                            <tr>
+                                <th>Source Field</th>
+                                <th>Source Label</th>
+                                <th>Source Type</th>
+                                <th class="arrow-header">→</th>
+                                <th>Salesforce Field</th>
+                                <th>Salesforce Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mapping-table-body">
+                            <!-- Mappings will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

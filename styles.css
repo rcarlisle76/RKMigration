@@ -331,8 +331,92 @@ header h1 {
     grid-column: 1 / -1;
 }
 
+.mapping-panel h3 {
+    color: #667eea;
+    margin: 30px 0 15px 0;
+    font-size: 1.2em;
+}
+
+.mapping-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid #667eea;
+}
+
+.mapping-form-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mapping-form-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.mapping-form-table th {
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mapping-form-table th.arrow-header {
+    width: 40px;
+    text-align: center;
+}
+
+.mapping-form-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.mapping-form-table .arrow-cell {
+    text-align: center;
+    font-size: 24px;
+    color: #667eea;
+    font-weight: bold;
+}
+
+.form-select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: #f8f9fa;
+    color: #555;
+}
+
+.form-input:read-only {
+    cursor: not-allowed;
+}
+
 .mapping-controls {
     margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
 }
 
 .mapping-table-container {
@@ -349,21 +433,23 @@ header h1 {
 }
 
 .mapping-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2c3e50;
     color: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
 }
 
 .mapping-table th {
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+}
+
+.mapping-table th.arrow-header {
+    width: 40px;
+    text-align: center;
 }
 
 .mapping-table tbody tr {
@@ -384,26 +470,19 @@ header h1 {
     vertical-align: middle;
 }
 
-.field-col {
+.mapping-table .field-col {
     font-weight: 600;
     color: #2c3e50;
-    min-width: 120px;
+    min-width: 150px;
 }
 
-.api-col {
-    font-family: 'Courier New', monospace;
-    color: #666;
-    font-size: 12px;
-    min-width: 120px;
-}
-
-.label-col {
+.mapping-table .label-col {
     color: #555;
-    min-width: 120px;
+    min-width: 150px;
 }
 
-.type-col {
-    min-width: 80px;
+.mapping-table .type-col {
+    min-width: 100px;
 }
 
 .type-badge {
@@ -418,47 +497,17 @@ header h1 {
     letter-spacing: 0.3px;
 }
 
-.value-col {
-    font-family: 'Courier New', monospace;
-    color: #555;
-    font-size: 12px;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.arrow-col {
+.mapping-table .arrow-col {
     text-align: center;
     font-size: 20px;
     color: #667eea;
     font-weight: bold;
-    width: 40px;
+    width: 50px;
 }
 
-.sf-select-col {
-    min-width: 250px;
-}
-
-.mapping-select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 13px;
-    background: white;
-    cursor: pointer;
-}
-
-.mapping-select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-}
-
-.actions-col {
+.mapping-table .actions-col {
     text-align: center;
-    width: 60px;
+    width: 80px;
 }
 
 .mapping-remove-btn {
