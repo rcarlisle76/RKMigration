@@ -10,62 +10,111 @@
     <div class="container">
         <header>
             <h1>RK Migration - Data Sync & Comparison</h1>
-            <p class="subtitle">Compare CSV data with Salesforce objects and create field mappings</p>
+            <p class="subtitle">Compare Salesforce objects between source and destination orgs</p>
         </header>
 
         <div class="main-content">
-            <!-- Salesforce Connection Panel -->
-            <div class="panel salesforce-panel">
-                <h2>Salesforce Connection</h2>
-                <div id="sf-login-form" class="form-section">
+            <!-- Source Salesforce Connection Panel -->
+            <div class="panel salesforce-panel source-panel">
+                <h2>Source Salesforce</h2>
+                <div id="source-login-form" class="form-section">
                     <div class="form-group">
-                        <label for="sf-url">Instance URL:</label>
-                        <select id="sf-url">
+                        <label for="source-url">Instance URL:</label>
+                        <select id="source-url">
                             <option value="https://login.salesforce.com">Production (login.salesforce.com)</option>
                             <option value="https://test.salesforce.com">Sandbox (test.salesforce.com)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="sf-username">Username:</label>
-                        <input type="text" id="sf-username" placeholder="your.email@company.com">
+                        <label for="source-username">Username:</label>
+                        <input type="text" id="source-username" placeholder="your.email@company.com">
                     </div>
                     <div class="form-group">
-                        <label for="sf-password">Password:</label>
-                        <input type="password" id="sf-password" placeholder="Password">
+                        <label for="source-password">Password:</label>
+                        <input type="password" id="source-password" placeholder="Password">
                     </div>
                     <div class="form-group">
-                        <label for="sf-token">Security Token:</label>
-                        <input type="password" id="sf-token" placeholder="Security Token">
+                        <label for="source-token">Security Token:</label>
+                        <input type="password" id="source-token" placeholder="Security Token">
                     </div>
-                    <button id="sf-connect-btn" class="btn btn-primary">Connect to Salesforce</button>
-                    <div id="sf-status" class="status-message"></div>
+                    <button id="source-connect-btn" class="btn btn-primary">Connect to Source</button>
+                    <div id="source-status" class="status-message"></div>
                 </div>
 
-                <div id="sf-connected-section" class="hidden">
+                <div id="source-connected-section" class="hidden">
                     <div class="connected-info">
                         <span class="status-indicator connected"></span>
-                        <span id="sf-user-info">Connected</span>
-                        <button id="sf-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
+                        <span id="source-user-info">Connected</span>
+                        <button id="source-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
                     </div>
 
                     <div class="form-group">
-                        <label for="sf-object-select">Select Salesforce Object:</label>
-                        <input type="text" id="sf-object-search" placeholder="Search objects...">
-                        <select id="sf-object-select" size="10">
+                        <label for="source-object-select">Select Source Object:</label>
+                        <input type="text" id="source-object-search" placeholder="Search objects...">
+                        <select id="source-object-select" size="10">
                             <option value="">Loading objects...</option>
                         </select>
                     </div>
 
-                    <div id="sf-fields-section" class="hidden">
-                        <h3>Salesforce Fields</h3>
-                        <div id="sf-fields-list" class="fields-list"></div>
+                    <div id="source-fields-section" class="hidden">
+                        <h3>Source Fields</h3>
+                        <div id="source-fields-list" class="fields-list"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- CSV Data Panel -->
-            <div class="panel csv-panel">
-                <h2>CSV Data</h2>
+            <!-- Destination Salesforce Connection Panel -->
+            <div class="panel salesforce-panel dest-panel">
+                <h2>Destination Salesforce</h2>
+                <div id="dest-login-form" class="form-section">
+                    <div class="form-group">
+                        <label for="dest-url">Instance URL:</label>
+                        <select id="dest-url">
+                            <option value="https://login.salesforce.com">Production (login.salesforce.com)</option>
+                            <option value="https://test.salesforce.com">Sandbox (test.salesforce.com)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dest-username">Username:</label>
+                        <input type="text" id="dest-username" placeholder="your.email@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="dest-password">Password:</label>
+                        <input type="password" id="dest-password" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="dest-token">Security Token:</label>
+                        <input type="password" id="dest-token" placeholder="Security Token">
+                    </div>
+                    <button id="dest-connect-btn" class="btn btn-primary">Connect to Destination</button>
+                    <div id="dest-status" class="status-message"></div>
+                </div>
+
+                <div id="dest-connected-section" class="hidden">
+                    <div class="connected-info">
+                        <span class="status-indicator connected"></span>
+                        <span id="dest-user-info">Connected</span>
+                        <button id="dest-disconnect-btn" class="btn btn-secondary btn-small">Disconnect</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dest-object-select">Select Destination Object:</label>
+                        <input type="text" id="dest-object-search" placeholder="Search objects...">
+                        <select id="dest-object-select" size="10">
+                            <option value="">Loading objects...</option>
+                        </select>
+                    </div>
+
+                    <div id="dest-fields-section" class="hidden">
+                        <h3>Destination Fields</h3>
+                        <div id="dest-fields-list" class="fields-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSV Data Panel (Optional) -->
+            <div class="panel csv-panel hidden">
+                <h2>CSV Data (Optional)</h2>
                 <div class="form-section">
                     <button id="load-csv-btn" class="btn btn-primary">Load CSV File</button>
                     <span id="csv-file-name" class="file-name"></span>

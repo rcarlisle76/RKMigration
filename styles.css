@@ -237,6 +237,13 @@ header h1 {
     margin-bottom: 5px;
 }
 
+.field-api-name {
+    font-size: 12px;
+    color: #666;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 5px;
+}
+
 .field-type {
     display: inline-block;
     background: #667eea;
