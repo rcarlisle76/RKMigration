@@ -401,21 +401,20 @@ function renderMappings() {
     }
 
     mappingTableBody.innerHTML = fieldMappings.map((mapping, index) => {
-        // Format sample values for display
+        // Format sample values for display - show only first value
         const sampleValues = mapping.sampleValues || [];
         const sampleText = sampleValues.length > 0
-            ? sampleValues.slice(0, 3).map(v => {
-                const str = String(v);
-                return str.length > 40 ? str.substring(0, 40) + '...' : str;
-              }).join(', ')
+            ? String(sampleValues[0])
             : 'No data';
 
-        const fullSampleText = sampleValues.join(', ');
+        const displayText = sampleText.length > 60
+            ? sampleText.substring(0, 60) + '...'
+            : sampleText;
 
         return `
         <tr>
             <td class="field-col">${mapping.sourceField}</td>
-            <td class="value-col" title="${fullSampleText}">${sampleText}</td>
+            <td class="value-col" title="${sampleText}">${displayText}</td>
             <td class="arrow-col">→</td>
             <td class="field-col">${mapping.destField}</td>
             <td class="actions-col">
