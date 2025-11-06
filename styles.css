@@ -476,6 +476,16 @@ header h1 {
     min-width: 150px;
 }
 
+.mapping-table .value-col {
+    font-family: 'Courier New', monospace;
+    color: #555;
+    font-size: 12px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .mapping-table .label-col {
     color: #555;
     min-width: 150px;

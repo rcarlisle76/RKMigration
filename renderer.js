@@ -375,11 +375,13 @@ addMappingBtn.addEventListener('click', () => {
 
     const selectedSourceOption = sourceFieldSelect.options[sourceFieldSelect.selectedIndex];
     const selectedDestOption = destFieldSelect.options[destFieldSelect.selectedIndex];
+    const sampleValues = JSON.parse(selectedSourceOption.dataset.sampleValues || '[]');
 
     fieldMappings.push({
         sourceField: sourceFieldValue,
         sourceLabel: selectedSourceOption.dataset.label,
         sourceType: selectedSourceOption.dataset.type,
+        sampleValues: sampleValues,
         destField: destFieldValue,
         destLabel: selectedDestOption.dataset.label,
         destType: selectedDestOption.dataset.type
@@ -394,14 +396,26 @@ addMappingBtn.addEventListener('click', () => {
 
 function renderMappings() {
     if (fieldMappings.length === 0) {
-        mappingTableBody.innerHTML = `<tr><td colspan="4" class="empty-state">No mappings created yet. Use the form above to add mappings.</td></tr>`;
+        mappingTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No mappings created yet. Use the form above to add mappings.</td></tr>`;
         return;
     }
 
     mappingTableBody.innerHTML = fieldMappings.map((mapping, index) => {
+        // Format sample values for display
+        const sampleValues = mapping.sampleValues || [];
+        const sampleText = sampleValues.length > 0
+            ? sampleValues.slice(0, 3).map(v => {
+                const str = String(v);
+                return str.length > 40 ? str.substring(0, 40) + '...' : str;
+              }).join(', ')
+            : 'No data';
+
+        const fullSampleText = sampleValues.join(', ');
+
         return `
         <tr>
             <td class="field-col">${mapping.sourceField}</td>
+            <td class="value-col" title="${fullSampleText}">${sampleText}</td>
             <td class="arrow-col">→</td>
             <td class="field-col">${mapping.destField}</td>
             <td class="actions-col">
