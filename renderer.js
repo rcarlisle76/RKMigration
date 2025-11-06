@@ -517,19 +517,47 @@ function analyzeCsvFields(results) {
     const fields = [];
     const headers = results.meta.fields;
 
-    headers.forEach(header => {
-        const values = results.data.map(row => row[header]).filter(v => v != null && v !== '');
-        const detectedType = detectFieldType(values);
-        const sampleValues = values.slice(0, 5);
+    // Check if this is a field definition CSV (has "Field API Name" and "Value" columns)
+    const hasFieldApiName = headers.some(h => h.toLowerCase().includes('field') && h.toLowerCase().includes('api'));
+    const hasValueColumn = headers.some(h => h.toLowerCase() === 'value');
 
-        fields.push({
-            name: header,
-            type: detectedType,
-            sampleValues: sampleValues,
-            nullCount: results.data.length - values.length,
-            uniqueCount: new Set(values).size
+    if (hasFieldApiName && hasValueColumn) {
+        // This CSV defines fields in rows, not columns
+        // Each row is: Field API Name, Label, Type, Value
+        const fieldApiNameCol = headers.find(h => h.toLowerCase().includes('field') && h.toLowerCase().includes('api'));
+        const valueCol = headers.find(h => h.toLowerCase() === 'value');
+        const typeCol = headers.find(h => h.toLowerCase() === 'type');
+        const labelCol = headers.find(h => h.toLowerCase() === 'label');
+
+        results.data.forEach(row => {
+            const fieldName = row[fieldApiNameCol];
+            if (fieldName && fieldName.trim()) {
+                fields.push({
+                    name: fieldName,
+                    type: row[typeCol] || 'Text',
+                    label: row[labelCol] || fieldName,
+                    sampleValues: row[valueCol] ? [row[valueCol]] : [],
+                    nullCount: 0,
+                    uniqueCount: 1
+                });
+            }
         });
-    });
+    } else {
+        // Traditional CSV: each column is a field
+        headers.forEach(header => {
+            const values = results.data.map(row => row[header]).filter(v => v != null && v !== '');
+            const detectedType = detectFieldType(values);
+            const sampleValues = values.slice(0, 5);
+
+            fields.push({
+                name: header,
+                type: detectedType,
+                sampleValues: sampleValues,
+                nullCount: results.data.length - values.length,
+                uniqueCount: new Set(values).size
+            });
+        });
+    }
 
     return fields;
 }
