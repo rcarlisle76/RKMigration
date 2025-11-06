@@ -200,7 +200,10 @@ class SFConnectionManager {
                 destFields = this.fields;
             }
 
-            this.displayFields(this.fields);
+            // Don't display fields - just keep them for the dropdown
+            // this.displayFields(this.fields);
+            // Don't show the fields section
+            // this.elements.fieldsSection.classList.remove('hidden');
 
             updateMappingSection();
         } catch (error) {
@@ -209,35 +212,10 @@ class SFConnectionManager {
     }
 
     displayFields(fields) {
-        this.elements.fieldsList.innerHTML = fields.map(field => {
-            const hasSampleValues = field.sampleValues && field.sampleValues.length > 0;
-
-            return `
-            <div class="field-item" data-field-name="${field.name}">
-                <div class="field-name">${field.label}</div>
-                <span class="field-type">${field.type}</span>
-                <div class="field-details">
-                    API Name: ${field.name}
-                    ${field.required ? ' • <strong>Required</strong>' : ''}
-                    ${field.unique ? ' • Unique' : ''}
-                    ${field.length ? ` • Max Length: ${field.length}` : ''}
-                    ${field.picklistValues && field.picklistValues.length > 0 ? ` • Picklist (${field.picklistValues.length} values)` : ''}
-                </div>
-                ${hasSampleValues ? `
-                    <div class="field-sample">
-                        <strong>Sample values:</strong><br>
-                        ${field.sampleValues.map(val => {
-                            const displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
-                            const truncated = String(displayVal).length > 100
-                                ? String(displayVal).substring(0, 100) + '...'
-                                : displayVal;
-                            return `• ${truncated}`;
-                        }).join('<br>')}
-                    </div>
-                ` : '<div class="field-sample"><em>No sample data available</em></div>'}
-            </div>
-            `;
-        }).join('');
+        // Don't display the fields list - users will see fields in the dropdown
+        // this.elements.fieldsList.innerHTML = fields.map(field => {
+        //     ... removed for cleaner interface
+        // }).join('');
     }
 
     showStatus(message, type) {
@@ -501,8 +479,9 @@ function parseCSV(content) {
             csvFields = analyzeCsvFields(results);
 
             csvRowCount.textContent = `${csvData.length} rows found`;
-            displayCsvFields(csvFields);
-            csvDataSection.classList.remove('hidden');
+            // Don't display CSV fields list - just update mapping section
+            // displayCsvFields(csvFields);
+            // csvDataSection.classList.remove('hidden');
 
             // Update mapping section with CSV data
             updateMappingSection();
