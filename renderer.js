@@ -453,6 +453,158 @@ clearMappingBtn.addEventListener('click', () => {
     }
 });
 
+// Load Data Button Handler
+const loadDataBtn = document.getElementById('load-data-btn');
+const dataLoadStatus = document.getElementById('data-load-status');
+
+loadDataBtn.addEventListener('click', async () => {
+    await loadDataToSalesforce();
+});
+
+async function loadDataToSalesforce() {
+    // Validation
+    if (!destConnection) {
+        showDataLoadStatus('Please connect to destination Salesforce first', 'error');
+        return;
+    }
+
+    if (fieldMappings.length === 0) {
+        showDataLoadStatus('Please create at least one field mapping before loading data', 'error');
+        return;
+    }
+
+    if (sourceType === 'csv' && (!csvData || csvData.length === 0)) {
+        showDataLoadStatus('No CSV data loaded. Please load a CSV file first', 'error');
+        return;
+    }
+
+    const destObject = destManager.elements.objectSelect.value;
+    if (!destObject) {
+        showDataLoadStatus('Please select a destination object', 'error');
+        return;
+    }
+
+    // Confirm before loading
+    const recordCount = sourceType === 'csv' ? csvData.length : 0;
+    const confirmMsg = sourceType === 'csv'
+        ? `This will load ${recordCount} records to ${destObject}. Continue?`
+        : `This will load data to ${destObject}. Continue?`;
+
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    // Disable button during load
+    loadDataBtn.disabled = true;
+    loadDataBtn.textContent = 'Loading Data...';
+    showDataLoadStatus('Preparing data for load...', 'info');
+
+    try {
+        if (sourceType === 'csv') {
+            await loadCsvDataToSalesforce(destObject);
+        } else {
+            showDataLoadStatus('Salesforce-to-Salesforce data loading not yet implemented', 'error');
+        }
+    } catch (error) {
+        showDataLoadStatus(`Data load failed: ${error.message}`, 'error');
+        console.error('Load error:', error);
+    } finally {
+        loadDataBtn.disabled = false;
+        loadDataBtn.textContent = 'Load Data to Salesforce';
+    }
+}
+
+async function loadCsvDataToSalesforce(destObject) {
+    // Check if CSV is field definition format or data format
+    const headers = Object.keys(csvData[0] || {});
+    const hasFieldApiName = headers.some(h => h.toLowerCase().includes('field') && h.toLowerCase().includes('api'));
+    const hasValueColumn = headers.some(h => h.toLowerCase() === 'value');
+
+    if (hasFieldApiName && hasValueColumn) {
+        // Field definition CSV - cannot load data
+        showDataLoadStatus('This CSV contains field definitions, not data rows. Please load a data CSV file.', 'error');
+        return;
+    }
+
+    // Transform CSV data according to field mappings
+    showDataLoadStatus(`Transforming ${csvData.length} records...`, 'info');
+
+    const transformedRecords = csvData.map(row => {
+        const sfRecord = {};
+
+        fieldMappings.forEach(mapping => {
+            const sourceValue = row[mapping.sourceField];
+            if (sourceValue !== null && sourceValue !== undefined && sourceValue !== '') {
+                sfRecord[mapping.destField] = sourceValue;
+            }
+        });
+
+        return sfRecord;
+    });
+
+    // Filter out empty records
+    const validRecords = transformedRecords.filter(record =>
+        Object.keys(record).length > 0
+    );
+
+    if (validRecords.length === 0) {
+        showDataLoadStatus('No valid records to load. Please check your mappings.', 'error');
+        return;
+    }
+
+    showDataLoadStatus(`Loading ${validRecords.length} records to Salesforce...`, 'info');
+
+    try {
+        // Use bulk insert for better performance
+        const result = await destConnection.sobject(destObject).insert(validRecords);
+
+        // Process results
+        const successCount = Array.isArray(result)
+            ? result.filter(r => r.success).length
+            : (result.success ? 1 : 0);
+
+        const errorCount = Array.isArray(result)
+            ? result.filter(r => !r.success).length
+            : (result.success ? 0 : 1);
+
+        if (errorCount === 0) {
+            showDataLoadStatus(
+                `✓ Successfully loaded ${successCount} records to ${destObject}`,
+                'success'
+            );
+        } else {
+            // Show detailed error information
+            const errors = Array.isArray(result)
+                ? result.filter(r => !r.success).map((r, i) => {
+                    const errorMsg = r.errors ? r.errors.map(e => e.message).join(', ') : 'Unknown error';
+                    return `Record ${i + 1}: ${errorMsg}`;
+                })
+                : [result.errors ? result.errors.map(e => e.message).join(', ') : 'Unknown error'];
+
+            showDataLoadStatus(
+                `Partial success: ${successCount} succeeded, ${errorCount} failed. First error: ${errors[0]}`,
+                'error'
+            );
+
+            console.error('Load errors:', errors);
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+function showDataLoadStatus(message, type) {
+    dataLoadStatus.textContent = message;
+    dataLoadStatus.className = `status-message ${type}`;
+    dataLoadStatus.classList.remove('hidden');
+
+    if (type === 'success') {
+        setTimeout(() => {
+            dataLoadStatus.classList.add('hidden');
+        }, 10000);
+    }
+}
+
 // CSV Loading (Optional)
 const loadCsvBtn = document.getElementById('load-csv-btn');
 const csvFileName = document.getElementById('csv-file-name');
